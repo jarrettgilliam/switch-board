@@ -1,0 +1,22 @@
+{
+  "name": "switch-board",
+  "version": "0.0.1",
+  "description": "Share a home server with friends, greenly",
+  "main": "app.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jarrettgilliam/switch-board"
+  },
+  "author": "Jarrett Gilliam",
+  "license": "MIT",
+  "dependencies": {
+    "basic-auth": "^1.1.0",
+    "express": "^4.14.0",
+    "helmet": "^3.1.0",
+    "md5": "^2.2.1",
+    "node-getopt": "^0.2.3",
+    "portscanner": "^2.1.1",
+    "ssh2": "^0.5.4",
+    "wake_on_lan": "0.0.4"
+  }
+}

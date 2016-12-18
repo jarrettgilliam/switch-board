@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>switch-board</title>
+    <link href="styles/style.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Dosis" rel="stylesheet">
+  </head>
+  <body>
+    <h1 class="text-shadow">switch-board</h1>
+    <form>
+      <select id="hostselector" onchange="host_changed()">
+      </select>
+    </form>
+    <div class="status-area">
+      <span id="online">Online</span>
+      <span class="splitter">|</span>
+      <span id="offline">Offline</span>
+    </div>
+    <p id="usersbox">No online users</p>
+    <div>
+      <button type="button" id="usingbutton" onclick="usingbutton_click()">Start Using</button>
+      <button type="button" id="powerbutton" onclick="powerbutton_click()" class="hidden">Power On</button>
+    </div>
+    <p class="hidden" id="messagebox"></p>
+    <script src="javascript/client.js"></script>
+  </body>
+</html>
