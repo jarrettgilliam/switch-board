@@ -142,13 +142,6 @@ function poweron_host(host, res) {
 // set up express
 var app = express();
 app.use(helmet());
-// app.use(helmet.contentSecurityPolicy({
-//   directives: {
-//     defaultSrc: ["'self'"],
-//     styleSrc: ["'self'", 'fonts.googleapis.com'],
-//     defaultSrc: ["'self'", 'fonts.gstatic.com']
-//   }
-// }));
 app.use(function(req, res, next) {
   var input = auth(req);
   if (input) {
