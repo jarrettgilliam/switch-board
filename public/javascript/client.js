@@ -73,7 +73,7 @@ function update_host_status() {
 
     // Set the usersbox
     var usersbox = document.getElementById("usersbox");
-    if (res.users.length > 0) {
+    if (res.users && res.users.length > 0) {
       usersbox.innerHTML = "Users: " + res.users.join(", ");
     } else {
       usersbox.innerHTML = "No online users"
