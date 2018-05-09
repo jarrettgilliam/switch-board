@@ -7,9 +7,11 @@ var helmet = require('helmet');
 var md5 = require('md5');
 var node_getopt = require('node-getopt');
 var path = require('path');
-var portscanner = require('portscanner');
+var dns = require('dns');
+var ping = require('net-ping');
 var Client = require('ssh2').Client;
 var wol = require('wake_on_lan');
+const { exec } = require('child_process');
 
 // Defaults
 var default_config_path = process.env['HOME'] + "/.config/switch-board/config.json";
@@ -32,15 +34,29 @@ if (!config.port) {
 for (var i = 0; i < config.hosts.length; i++) {
   var host = config.hosts[i];
   host.id = String(i);
-  if (!host.sshport) {
-    host.sshport = default_sshport;
-  }
-  if (!host.sshkey) {
-    if (fs.existsSync((default_sshkey_path))) {
-      host.sshkey = default_sshkey_path;
-    } else {
-      console.log("Error: no ssh password or key");
+  dns.lookup(host.hostname, (err, address, family) => {
+    if (err) {
+      console.log("Error: unable to resolve hostname '"+host.hostname+"'");
       process.exit(1);
+    } else {
+      host.ip = address;
+    }
+  });
+
+  if (host.poweroff_method === "ssh_command") {
+    if (!host.sshport) {
+      host.sshport = default_sshport;
+    }
+    if (!host.sshhost) {
+      host.sshhost = host.hostname;
+    }
+    if (!host.sshkey) {
+      if (fs.existsSync((default_sshkey_path))) {
+        host.sshkey = default_sshkey_path;
+      } else {
+        console.log("Error: no ssh password or key");
+        process.exit(1);
+      }
     }
   }
   if (!host.poweroff_command) {
@@ -79,32 +95,27 @@ function get_user_from_req(req) {
   return undefined;
 }
 
+var ping_session = ping.createSession({timeout: 500});
 function get_valid_host_status(host, res, callback) {
-  portscanner.checkPortStatus(host.sshport, host.hostname, function(err, status) {
+  ping_session.pingHost(host.ip, function (err, target) {
     if (err) {
-      res.send({
-        status: 'error'
-        //message: err.code
-      });
-    } else if (status === 'open') {
-      callback('online');
-    } else if (status === 'closed') {
-      callback('offline');
+      if (err instanceof ping.RequestTimedOutError) {
+        callback('offline');
+      } else {
+        res.send({ status: 'error' });
+      }
     } else {
-      callback(status);
+      callback('online');
     }
   });
 }
 
-function poweroff_host(host, res) {
+function poweroff_host_via_ssh_command(host, res) {
   var conn = new Client();
   conn.on('ready', function() {
     conn.exec(host.poweroff_command, function(err, stream) {
       if (err) {
-        res.send({
-          status: 'error'
-          //message: err.message
-        });
+        res.send({ status: 'error' });
       } else {
         res.send({ status: 'success' });
       }
@@ -112,13 +123,10 @@ function poweroff_host(host, res) {
     });
   });
   conn.on('error', function(err) {
-    res.send({
-      status: 'error'
-      //message: err.message
-    });
+    res.send({ status: 'error' });
   });
   conn.connect({
-    host: host.hostname,
+    host: host.sshhost,
     port: host.sshport,
     username: host.sshuser,
     privateKey: fs.readFileSync(host.sshkey),
@@ -126,13 +134,30 @@ function poweroff_host(host, res) {
   });
 }
 
+function poweroff_host_via_local_command(host, res) {
+  exec(host.poweroff_command, function (err, stdout, stderr) {
+    if (err) {
+      res.send({ status: 'error' });
+    } else {
+      res.send({ status: 'success' });
+    }
+  });
+}
+
+function poweroff_host(host, res) {
+  if (host.poweroff_method === "ssh_command") {
+    poweroff_host_via_ssh_command(host, res);
+  } else if (host.poweroff_method === "local_command") {
+    poweroff_host_via_local_command(host, res);
+  } else {
+    res.send({ status: 'error' });
+  }
+}
+
 function poweron_host(host, res) {
   wol.wake(host.macaddress, function(err) {
     if (err) {
-      res.send({
-        status: 'error'
-        //message: 'Unknown error'
-      });
+      res.send({ status: 'error' });
     } else {
       res.send({ status: 'success' });
     }
