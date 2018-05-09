@@ -118,7 +118,9 @@ function get_valid_host_status(host, res, callback) {
   ping_session.pingHost(host.ip, function (err, target) {
     if (err) {
       if (err instanceof ping.RequestTimedOutError ||
-          err instanceof ping.DestinationUnreachableError) {
+          err instanceof ping.DestinationUnreachableError ||
+          err.message === "No route to host" ||
+          err.message === "Host is down") {
         callback('offline');
       } else {
         res.send({ status: 'error' });
