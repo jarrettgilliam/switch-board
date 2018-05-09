@@ -14,7 +14,8 @@ var wol = require('wake_on_lan');
 const { exec } = require('child_process');
 
 // Defaults
-var default_config_path = process.env['HOME'] + "/.config/switch-board/config.json";
+var local_config_path = "config.json";
+var user_config_path = process.env['HOME'] + "/.config/switch-board/" + local_config_path;
 var default_port = 3000;
 var default_sshkey_path = process.env['HOME'] + "/.ssh/id_rsa";
 var default_sshport = 22;
@@ -27,7 +28,22 @@ var opt = node_getopt.create([
 ]).bindHelp().parseSystem();
 
 // parse the configuration file
-var config = JSON.parse(fs.readFileSync(opt.options.config || default_config_path));
+var config;
+for (let config_path of [ opt.options.config, local_config_path, user_config_path ]) {
+  if (fs.existsSync(config_path)) {
+    try {
+      config = JSON.parse(fs.readFileSync(config_path));
+      break;
+    } catch (error) {
+      console.log(error);
+    }
+  }
+}
+if (!config) {
+  console.log("Error: unable to find config file");
+  process.exit(1);
+}
+
 if (!config.port) {
   config.port = default_port;
 }
@@ -51,7 +67,7 @@ for (var i = 0; i < config.hosts.length; i++) {
       host.sshhost = host.hostname;
     }
     if (!host.sshkey) {
-      if (fs.existsSync((default_sshkey_path))) {
+      if (fs.existsSync(default_sshkey_path)) {
         host.sshkey = default_sshkey_path;
       } else {
         console.log("Error: no ssh password or key");
