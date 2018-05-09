@@ -9,6 +9,7 @@ var node_getopt = require('node-getopt');
 var path = require('path');
 var dns = require('dns');
 var ping = require('net-ping');
+var ping_session = ping.createSession({timeout: 500});
 var Client = require('ssh2').Client;
 var wol = require('wake_on_lan');
 const { exec } = require('child_process');
@@ -73,6 +74,8 @@ for (var i = 0; i < config.hosts.length; i++) {
         console.log("Error: no ssh password or key");
         process.exit(1);
       }
+    } else if (host.poweroff_method !== "local_command") {
+      console.log("Error: invalid poweroff_method: " + host.poweroff_method);
     }
   }
   if (!host.poweroff_command) {
@@ -111,14 +114,15 @@ function get_user_from_req(req) {
   return undefined;
 }
 
-var ping_session = ping.createSession({timeout: 500});
 function get_valid_host_status(host, res, callback) {
   ping_session.pingHost(host.ip, function (err, target) {
     if (err) {
-      if (err instanceof ping.RequestTimedOutError) {
+      if (err instanceof ping.RequestTimedOutError ||
+          err instanceof ping.DestinationUnreachableError) {
         callback('offline');
       } else {
         res.send({ status: 'error' });
+        console.log(err);
       }
     } else {
       callback('online');
@@ -132,6 +136,7 @@ function poweroff_host_via_ssh_command(host, res) {
     conn.exec(host.poweroff_command, function(err, stream) {
       if (err) {
         res.send({ status: 'error' });
+        console.log(err);
       } else {
         res.send({ status: 'success' });
       }
@@ -140,13 +145,14 @@ function poweroff_host_via_ssh_command(host, res) {
   });
   conn.on('error', function(err) {
     res.send({ status: 'error' });
+    console.log(err);
   });
   conn.connect({
     host: host.sshhost,
     port: host.sshport,
     username: host.sshuser,
     privateKey: fs.readFileSync(host.sshkey),
-    readyTimeout: 1000
+    readyTimeout: 2000
   });
 }
 
@@ -154,6 +160,7 @@ function poweroff_host_via_local_command(host, res) {
   exec(host.poweroff_command, function (err, stdout, stderr) {
     if (err) {
       res.send({ status: 'error' });
+      console.log(err);
     } else {
       res.send({ status: 'success' });
     }
@@ -174,6 +181,7 @@ function poweron_host(host, res) {
   wol.wake(host.macaddress, function(err) {
     if (err) {
       res.send({ status: 'error' });
+      console.log(err);
     } else {
       res.send({ status: 'success' });
     }
