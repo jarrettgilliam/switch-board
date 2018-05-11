@@ -100,7 +100,7 @@ Configuration
 
 ### switch-board
 
-siwtch-board's configuration is file driven. By default, it will look for the file `~/.config/switch-board/config.json`. The configuration file can also be specified with the `--config` option.
+switch-board's configuration is file driven. By default, it will look for the file `~/.config/switch-board/config.json`. The configuration file can also be specified with the `--config` option.
 
 The most basic configuration file will look something like this.
 
