@@ -3,6 +3,7 @@
 var auth = require('basic-auth');
 var express = require('express');
 var fs = require('fs');
+var os = require('os');
 var helmet = require('helmet');
 var md5 = require('md5');
 var node_getopt = require('node-getopt');
@@ -14,9 +15,9 @@ const { exec } = require('child_process');
 
 // Defaults
 var local_config_path = "config.json";
-var user_config_path = process.env['HOME'] + "/.config/switch-board/" + local_config_path;
+var user_config_path = os.homedir() + "/.config/switch-board/" + local_config_path;
 var default_port = 3000;
-var default_sshkey_path = process.env['HOME'] + "/.ssh/id_rsa";
+var default_sshkey_path = os.homedir() + "/.ssh/id_rsa";
 var default_sshport = 22;
 var default_poweroff_command = "sudo poweroff";
 var ping_cfg = {timeout: 1};
