@@ -7,9 +7,7 @@ var helmet = require('helmet');
 var md5 = require('md5');
 var node_getopt = require('node-getopt');
 var path = require('path');
-var dns = require('dns');
-var ping = require('net-ping');
-var ping_session = ping.createSession({timeout: 500});
+var ping = require('ping');
 var Client = require('ssh2').Client;
 var wol = require('wake_on_lan');
 const { exec } = require('child_process');
@@ -21,6 +19,7 @@ var default_port = 3000;
 var default_sshkey_path = process.env['HOME'] + "/.ssh/id_rsa";
 var default_sshport = 22;
 var default_poweroff_command = "sudo poweroff";
+var ping_cfg = {timeout: 1};
 
 // parse options
 var opt = node_getopt.create([
@@ -51,15 +50,6 @@ if (!config.port) {
 for (var i = 0; i < config.hosts.length; i++) {
   var host = config.hosts[i];
   host.id = String(i);
-  dns.lookup(host.hostname, (err, address, family) => {
-    if (err) {
-      console.log("Error: unable to resolve hostname '"+host.hostname+"'");
-      process.exit(1);
-    } else {
-      host.ip = address;
-    }
-  });
-
   if (host.poweroff_method === "ssh_command") {
     if (!host.sshport) {
       host.sshport = default_sshport;
@@ -115,21 +105,9 @@ function get_user_from_req(req) {
 }
 
 function get_valid_host_status(host, res, callback) {
-  ping_session.pingHost(host.ip, function (err, target) {
-    if (err) {
-      if (err instanceof ping.RequestTimedOutError ||
-          err instanceof ping.DestinationUnreachableError ||
-          err.message === "No route to host" ||
-          err.message === "Host is down") {
-        callback('offline');
-      } else {
-        res.send({ status: 'error' });
-        console.log(err);
-      }
-    } else {
-      callback('online');
-    }
-  });
+  ping.sys.probe(host.hostname, function(online) {
+    callback(online ? 'online' : 'offline');
+  }, ping_cfg);
 }
 
 function poweroff_host_via_ssh_command(host, res) {
@@ -242,7 +220,7 @@ app.get('/switch-board/api/status/:hostId', function (req, res) {
       var response = {
         status: status,
         using: false
-       };
+      };
       response.users = host.users.map(function(elem) {
         if (elem.username === user.username) {
           response.using = true;
