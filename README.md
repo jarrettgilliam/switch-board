@@ -39,7 +39,7 @@ Now log in with the newly created user.
 sudo login switch-board
 ```
 
-Now we need to prepare for a password-less login from *Switchy*. To do this, first verity that `PubkeyAuthentication` is `yes` in the file `/etc/ssh/sshd_config`, then do the following.
+Now we need to prepare for a password-less login from *Switchy*. To do this, first verify that `PubkeyAuthentication` is `yes` in the file `/etc/ssh/sshd_config`, then do the following.
 
 ```sh
 mkdir ~/.ssh

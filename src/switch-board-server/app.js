@@ -20,17 +20,17 @@ var default_port = 3000;
 var default_sshkey_path = os.homedir() + "/.ssh/id_rsa";
 var default_sshport = 22;
 var default_poweroff_command = "sudo poweroff";
-var ping_cfg = {timeout: 1};
+var ping_cfg = { timeout: 1 };
 
 // parse options
 var opt = node_getopt.create([
-  ['c' , 'config=ARG'          , 'configuration file'],
-  ['h' , 'help'                , 'display this help']
+  ['c', 'config=ARG', 'configuration file'],
+  ['h', 'help', 'display this help']
 ]).bindHelp().parseSystem();
 
 // parse the configuration file
 var config;
-for (let config_path of [ opt.options.config, local_config_path, user_config_path ]) {
+for (let config_path of [opt.options.config, local_config_path, user_config_path]) {
   if (fs.existsSync(config_path)) {
     try {
       config = JSON.parse(fs.readFileSync(config_path));
@@ -77,7 +77,7 @@ for (var i = 0; i < config.hosts.length; i++) {
 
 // helper fulctions
 function get_valid_host(id, res) {
-  var host = config.hosts.find(function(host) {
+  var host = config.hosts.find(function (host) {
     return id === host.id;
   });
   if (!host) {
@@ -92,8 +92,8 @@ function get_valid_host(id, res) {
 }
 
 function get_user(username) {
-  return config.users.find(function(user) {
-      return username === user.username;
+  return config.users.find(function (user) {
+    return username === user.username;
   });
 }
 
@@ -106,15 +106,15 @@ function get_user_from_req(req) {
 }
 
 function get_valid_host_status(host, res, callback) {
-  ping.sys.probe(host.hostname, function(online) {
+  ping.sys.probe(host.hostname, function (online) {
     callback(online ? 'online' : 'offline');
   }, ping_cfg);
 }
 
 function poweroff_host_via_ssh_command(host, res) {
   var conn = new Client();
-  conn.on('ready', function() {
-    conn.exec(host.poweroff_command, function(err, stream) {
+  conn.on('ready', function () {
+    conn.exec(host.poweroff_command, function (err, stream) {
       if (err) {
         res.send({ status: 'error' });
         console.log(err);
@@ -124,7 +124,7 @@ function poweroff_host_via_ssh_command(host, res) {
       conn.end();
     });
   });
-  conn.on('error', function(err) {
+  conn.on('error', function (err) {
     res.send({ status: 'error' });
     console.log(err);
   });
@@ -159,7 +159,7 @@ function poweroff_host(host, res) {
 }
 
 function poweron_host(host, res) {
-  wol.wake(host.macaddress, function(err) {
+  wol.wake(host.macaddress, function (err) {
     if (err) {
       res.send({ status: 'error' });
       console.log(err);
@@ -172,32 +172,24 @@ function poweron_host(host, res) {
 // set up express
 var app = express();
 app.use(helmet());
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   var input = auth(req);
   if (input) {
     var user = get_user(input['name']);
   }
   if (!user || user.password !== (user.password_encoding === 'md5' ?
-        md5(input['pass']) : input['pass'])) {
-      res.statusCode = 401;
-      res.setHeader('WWW-Authenticate', 'Basic realm="switch-board"');
-      res.end('Unauthorized');
+    md5(input['pass']) : input['pass'])) {
+    res.statusCode = 401;
+    res.setHeader('WWW-Authenticate', 'Basic realm="switch-board"');
+    res.end('Unauthorized');
   } else {
-      next();
+    next();
   }
 });
 
-// redirect users
-app.get('/', function (req, res) {
-  res.redirect(301, '/switch-board');
-});
-
-// serve the client
-app.use('/switch-board', express.static(path.join(__dirname, 'public')));
-
 // listen for hosts requests
 app.get('/switch-board/api/hosts', function (req, res) {
-  res.send(config.hosts.map(function(host) {
+  res.send(config.hosts.map(function (host) {
     return {
       id: host.id,
       name: host.name,
@@ -216,13 +208,13 @@ app.get('/switch-board/api/user', function (req, res) {
 // Listen for host status requests
 app.get('/switch-board/api/status/:hostId', function (req, res) {
   if (host = get_valid_host(req.params.hostId, res)) {
-    get_valid_host_status(host, res, function(status) {
+    get_valid_host_status(host, res, function (status) {
       var user = get_user_from_req(req);
       var response = {
         status: status,
         using: false
       };
-      response.users = host.users.map(function(elem) {
+      response.users = host.users.map(function (elem) {
         if (elem.username === user.username) {
           response.using = true;
         }
@@ -235,9 +227,9 @@ app.get('/switch-board/api/status/:hostId', function (req, res) {
 
 app.post('/switch-board/api/usehost/:hostId', function (req, res) {
   if (host = get_valid_host(req.params.hostId, res)) {
-    get_valid_host_status(host, res, function(status) {
+    get_valid_host_status(host, res, function (status) {
       var user = get_user_from_req(req);
-      var found = host.users.find(function(elem) {
+      var found = host.users.find(function (elem) {
         return user.username === elem.username;
       });
       if (!found) {
@@ -258,7 +250,7 @@ app.post('/switch-board/api/usehost/:hostId', function (req, res) {
 app.post('/switch-board/api/unusehost/:hostId', function (req, res) {
   if (host = get_valid_host(req.params.hostId, res)) {
     var user = get_user_from_req(req);
-    host.users = host.users.filter(function(elem) {
+    host.users = host.users.filter(function (elem) {
       return elem.username !== user.username;
     });
     if (host.users.length === 0) {
@@ -277,7 +269,7 @@ app.post('/switch-board/api/poweron/:hostId', function (req, res) {
         message: 'Only admins can poweron directly'
       });
     } else {
-      get_valid_host_status(host, res, function(status) {
+      get_valid_host_status(host, res, function (status) {
         poweron_host(host, res);
       });
     }
