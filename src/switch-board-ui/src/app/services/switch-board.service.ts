@@ -14,7 +14,7 @@ import { ActionResponse } from '../models/action-response';
 })
 export class SwitchBoardService {
 
-  baseUrl = "switch-board/api";
+  baseUrl = "api";
   httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' })
   };
@@ -66,7 +66,7 @@ export class SwitchBoardService {
       catchError(this.handleError<ActionResponse>('powering on host', {
         status: 'error'
       }))
-    ); 
+    );
   }
 
   poweroffHost(id: number): Observable<ActionResponse> {
@@ -74,7 +74,7 @@ export class SwitchBoardService {
       catchError(this.handleError<ActionResponse>('powering off host', {
         status: 'error'
       }))
-    ); 
+    );
   }
 
   private handleError<T>(operation, result?: T) {
