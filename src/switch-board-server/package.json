@@ -1,6 +1,6 @@
 {
   "name": "switch-board",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Share a home server with friends, greenly",
   "main": "app.js",
   "repository": {
@@ -15,7 +15,7 @@
     "helmet": "^3.12.0",
     "md5": "^2.2.1",
     "node-getopt": "^0.3.2",
-    "ping": "^0.2.2",
+    "ping": "^0.2.3",
     "ssh2": "^0.6.1",
     "wake_on_lan": "0.0.4"
   }

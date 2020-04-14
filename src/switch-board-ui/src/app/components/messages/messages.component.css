@@ -1,0 +1,12 @@
+.error {
+  color: #881717;
+}
+
+.success {
+  color: #005000;
+}
+
+p {
+  font-weight: bold;
+  text-shadow: none;
+}

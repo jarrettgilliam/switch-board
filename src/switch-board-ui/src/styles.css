@@ -1,0 +1,22 @@
+html, body, select, span {
+  font-family: 'Dosis', sans-serif;
+  text-align: center;
+}
+
+html {
+  background-color: #909090;
+}
+
+h1 {
+  font-size: 4.2em;
+  font-weight: bold;
+}
+
+h1, span, button, select, p {
+  color: black;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+p {
+  font-size: 1.2em;
+}
