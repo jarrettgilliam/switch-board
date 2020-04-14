@@ -1,6 +1,6 @@
 {
   "name": "switch-board",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Share a home server with friends, greenly",
   "main": "app.js",
   "repository": {
