@@ -1,7 +1,12 @@
 .error {
-  color: FireBrick;
+  color: #881717;
 }
 
 .success {
-  color: rgb(0, 150, 0);
+  color: #005000;
+}
+
+p {
+  font-weight: bold;
+  text-shadow: none;
 }
