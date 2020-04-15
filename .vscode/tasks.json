@@ -6,7 +6,7 @@
         "type": "npm",
         "script": "start",
         "isBackground": true,
-        "path": "src/switch-board-ui/package.json",
+        "path": "src/switch-board/package.json",
         "presentation": {
           "focus": true,
           "panel": "dedicated"

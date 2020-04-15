@@ -1,11 +1,11 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 
 # compiled output
-/src/switch-board-ui/dist
-/src/switch-board-ui/tmp
-/src/switch-board-ui/out-tsc
+/src/switch-board/dist
+/src/switch-board/tmp
+/src/switch-board/out-tsc
 # Only exists if Bazel was run
-/src/switch-board-ui/bazel-out
+/src/switch-board/bazel-out
 
 # dependencies
 node_modules
@@ -49,4 +49,4 @@ Thumbs.db
 /src/switch-board-server/config.json
 
 # Angular API proxy file
-/src/switch-board-ui/proxy.conf.json
+/src/switch-board/proxy.conf.json
