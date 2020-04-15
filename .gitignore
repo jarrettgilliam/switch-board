@@ -46,7 +46,7 @@ testem.log
 Thumbs.db
 
 # Local switch-board server config
-/src/switch-board-server/config.json
+/src/switch-board-api/config.json
 
 # Angular API proxy file
 /src/switch-board/proxy.conf.json

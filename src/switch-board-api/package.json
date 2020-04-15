@@ -1,5 +1,5 @@
 {
-  "name": "switch-board",
+  "name": "switch-board-api",
   "version": "0.0.7",
   "description": "Share a home server with friends, greenly",
   "main": "app.js",
