@@ -1,3 +1,5 @@
+# *This project is abandonded. You probably shouldn't use it. I would recommend [UpSnap](https://github.com/seriousm4x/UpSnap) instead.*
+
 switch-board
 ============
 
